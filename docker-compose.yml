@@ -1,0 +1,49 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: frontend
+    ports:
+      - "5173:5173"
+    networks:
+      - net_app
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    image: backend
+    environment:
+      DB_USER: postgres
+      DB_PASS: senai
+      DB_HOST: postgres
+      DB_NAME: quitanda
+      DB_PORT: 5432
+    ports:
+      - "3000:3000"
+    networks:
+      - net_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:14
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: senai
+      POSTGRES_DB: quitanda
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    networks:
+      - net_app
+
+volumes:
+  postgres_data:
+
+networks:
+  net_app:
+    driver: bridge
